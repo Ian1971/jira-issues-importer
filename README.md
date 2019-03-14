@@ -1,6 +1,11 @@
 # JIRA issues importer
 
-Python 2.x scripts for importing JIRA issues in XML format into an existing Github project without existing issues
+Python 3.x scripts for importing JIRA issues in XML format into an existing Github project without existing issues
+
+Forked from original to add 3.x support and improve issue throughput with asyncio
+Also this version doesn't terminate on most issues, but keeps a log of success and failure.
+Issues can be skipped by adding to skip.txt. In this way if the process fails in the middle you can prevent
+creating duplicates.
 
 # Background
 
@@ -35,8 +40,8 @@ I took these as a starting point for this project. I restructured the code and a
 
 # Assumptions and prerequisites
 
-* the migration scripts are written in Python 2.x. In particular, they were tested with Python 2.7 on Windows
-* python modules used are getpass, collections, lxml, htmlentitydefs, dateutil.parser, re, requests, random, time
+* the migration scripts are written in Python 3.x. In particular, they were tested with Python 3.7.2 on Windows
+* python modules used are getpass, collections, lxml, html.entities, dateutil.parser, re, requests, random, time, asyncio
 * use these scripts at your own risk, no warranties for a correct and successful migration are given
 * it's recommended to test your issue migration first with a test project on Github
 * input to the import script is the XML export file of your JIRA project, see below
@@ -55,7 +60,7 @@ I took these as a starting point for this project. I restructured the code and a
   * the JIRA project name
   * the Github account name (user or organization)
   * the target Github repository name
-  * the Github user and password for authentication
+  * the Github user and acess token for authentication
 * the import process will then
   * read the JIRA XML export file and create an in-memory project representation of the xml file contents
   * import the milestones with the regular [Github Milestone API](https://developer.github.com/v3/issues/milestones/)
