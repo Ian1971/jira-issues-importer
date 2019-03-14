@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from collections import defaultdict
-from htmlentitydefs import name2codepoint
+from html.entities import name2codepoint
 from dateutil.parser import parse
 import re
 
@@ -24,7 +24,7 @@ class Project:
   def add_item(self, item):
     itemProject = self._projectFor(item)
     if itemProject != self.name:
-      print 'Skipping item ' + item.key.text + ' for project ' + itemProject + ' current project: ' + self.name
+      print('Skipping item ' + item.key.text + ' for project ' + itemProject + ' current project: ' + self.name)
       return
   
     self._append_item_to_project(item)
@@ -39,23 +39,23 @@ class Project:
 
 
   def merge_labels_and_components(self):
-    print
-    print 'Components will be combined with labels as github labels...'    
+    print()
+    print('Components will be combined with labels as github labels...'    )
     self._project['Components'].update(self._project['Labels'])
   
   def prettify(self):
     def hist(h):
-      for key in h.iterkeys():
-        print ('%30s(%5d): ' + h[key] * '#') % (key, h[key])
-      print
+      for key in h.keys():
+        print(('%30s(%5d): ' + h[key] * '#') % (key, h[key]))
+      print()
 
-    print self.name + ':\n  Milestones:'
+    print(self.name + ':\n  Milestones:')
     hist(self._project['Milestones'])
-    print '  Components:'
+    print('  Components:')
     hist(self._project['Components'])
-    print '  Labels:'
+    print('  Labels:')
     hist(self._project['Labels'])
-    print
+    print()
 
   def _projectFor(self, item):
     try:
@@ -67,7 +67,8 @@ class Project:
 
   def _append_item_to_project(self, item):
     # todo assignee
-    closed = str(item.status.get('id')) in ('5', '6')
+    #closed = str(item.status.get('id')) in ('5', '6')
+    closed = str(item.status.text) in ('Done', 'Closed')
     closed_at = ''
     if closed:
       try:
@@ -82,7 +83,7 @@ class Project:
       'closed_at': closed_at,
       'updated_at': self._convert_to_iso(item.updated.text),
       'closed': closed,
-      "labels": [],
+      "labels": ['from-jira','enhancement'],
       'comments': [],
       'duplicates': [],
       'is-duplicated-by': [],
@@ -138,20 +139,24 @@ class Project:
     except AttributeError:
       pass
     except KeyError:
-          print 'KeyError at ' + item.key.text
-    try:
+          print('KeyError at ' + item.key.text)
+    skiplist=["tested by","is blocked by","is cloned by","relates to"]
+    try:	  
       for issuelinktype in item.issuelinks.issuelinktype:
         for inwardlink in issuelinktype.inwardlinks:
-          for issuelink in inwardlink.issuelink:
-            for issuekey in issuelink.issuekey:
-              self._project['Issues'][-1][inwardlink.get("description").replace(' ', '-')].append(issuekey.text)
+          if inwardlink.get("description") not in skiplist:
+            for issuelink in inwardlink.issuelink:
+              for issuekey in issuelink.issuekey:
+                self._project['Issues'][-1][inwardlink.get("description").replace(' ', '-')].append(issuekey.text)
     except AttributeError:
       pass
+    except KeyError:
+      print('KeyError at ' + item.key.text)
 
   
   def _htmlentitydecode(self, s):
     if s is None: return ''
     s = s.replace(' ' * 8, '')
     return re.sub('&(%s);' % '|'.join(name2codepoint),
-        lambda m: unichr(name2codepoint[m.group(1)]), s)
+        lambda m: chr(name2codepoint[m.group(1)]), s)
     
