@@ -2,7 +2,7 @@
 
 Python 3.x scripts for importing JIRA issues in XML format into an existing Github project without existing issues
 
-Forked from original to add 3.x support and improve issue throughput with asyncio
+Forked from original to add 3.x support and improve issue throughput with asyncio.
 Also this version doesn't terminate on most issues, but keeps a log of success and failure.
 Issues can be skipped by adding to skip.txt. In this way if the process fails in the middle you can prevent
 creating duplicates.
